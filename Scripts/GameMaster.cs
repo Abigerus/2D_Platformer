@@ -1,11 +1,12 @@
-﻿using UnityEngine;
+using UnityEngine;
 using System.Collections;
+using UnityStandardAssets.ImageEffects;
 
 public class GameMaster : MonoBehaviour {
 
 	public static GameMaster gm;
 
-	void Start () {
+	void Awake () {
 		if (gm == null) {
 			gm = GameObject.FindGameObjectWithTag ("GM").GetComponent<GameMaster>();
 		}
@@ -17,7 +18,7 @@ public class GameMaster : MonoBehaviour {
 	public Transform spawnPrefab;
 
 	public IEnumerator RespawnPlayer () {
-		audio.Play ();
+		GetComponent<AudioSource>().Play ();
 		yield return new WaitForSeconds (spawnDelay);
 
 		Instantiate (playerPrefab, spawnPoint.position, spawnPoint.rotation);
@@ -28,6 +29,10 @@ public class GameMaster : MonoBehaviour {
 	public static void KillPlayer (Player player) {
 		Destroy (player.gameObject);
 		gm.StartCoroutine (gm.RespawnPlayer());
+	}
+	
+	public static void KillEnemy (Enemy enemy) {
+		Destroy (enemy.gameObject);
 	}
 
 }
