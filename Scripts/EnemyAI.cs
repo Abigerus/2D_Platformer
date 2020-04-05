@@ -32,12 +32,17 @@ public class EnemyAI : MonoBehaviour {
 	// The waypoint we are currently moving towards
 	private int currentWaypoint = 0;
 	
+	private bool searchingForPlayer = false;
+	
 	void Start () {
 		seeker = GetComponent<Seeker>();
 		rb = GetComponent<Rigidbody2D>();
 		
 		if (target == null) {
-			Debug.LogError ("No Player found? PANIC!");
+			if (!searchingForPlayer) {
+				searchingForPlayer = true;
+				StartCoroutine (SearchForPlayer());
+			}
 			return;
 		}
 		
@@ -47,10 +52,26 @@ public class EnemyAI : MonoBehaviour {
 		StartCoroutine (UpdatePath ());
 	}
 	
+	IEnumerator SearchForPlayer () {
+		GameObject sResult = GameObject.FindGameObjectWithTag ("Player");
+		if (sResult == null){
+			yield return new WaitForSeconds ( 0.5f);
+			StartCoroutine (SearchForPlayer());
+		} else {
+			target = sResult.transform;
+			searchingForPlayer = false;
+			StartCoroutine (UpdatePath());
+			yield return false;			
+		}
+	}
+	
 	IEnumerator UpdatePath () {
 		if (target == null) {
-			//TODO: Insert a player search here.
-			return false;
+			if (!searchingForPlayer) {
+				searchingForPlayer = true;
+				StartCoroutine (SearchForPlayer());
+			}
+			yield return false;
 		}
 		
 		// Start a new path to the target position, return the result to the OnPathComplete method
@@ -70,7 +91,10 @@ public class EnemyAI : MonoBehaviour {
 	
 	void FixedUpdate () {
 		if (target == null) {
-			//TODO: Insert a player search here.
+			if (!searchingForPlayer) {
+				searchingForPlayer = true;
+				StartCoroutine (SearchForPlayer());
+			}
 			return;
 		}
 		
